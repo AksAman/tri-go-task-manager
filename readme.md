@@ -39,4 +39,5 @@ go build main.go
 ## Work Remaining
 - [ ] Add tests
 - [ ] Add more commands
-- [ ] Add Database support 
+- [ ] Fix Edit command
+- [x] Add Database support 
