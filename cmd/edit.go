@@ -4,8 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +14,7 @@ var editCmd = &cobra.Command{
 }
 
 func editRun(cmd *cobra.Command, args []string) {
-	fmt.Println("edit called")
+	logger.Infoln("edit called")
 }
 
 func init() {

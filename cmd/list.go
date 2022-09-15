@@ -5,9 +5,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/AksAman/tri/todo"
+	"github.com/AksAman/tri/models/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +27,8 @@ var (
 func ListRun(cmd *cobra.Command, args []string) {
 	items, err := todo.ReadItems(getDataFilePath())
 	if err != nil {
-		log.Printf("Error while reading todos: %v \n", err)
+		logger.Errorf("Error while reading todos: %v \n", err)
+		return
 	}
 
 	if len(items) == 0 {

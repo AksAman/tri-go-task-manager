@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/AksAman/tri/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 var (
@@ -29,6 +31,15 @@ var rootCmd = &cobra.Command{
 	by spf13 (https://spf13.com/presentation/building-an-awesome-cli-app-in-go-oscon/)
 `,
 }
+var logger *zap.SugaredLogger
+
+func init() {
+	utils.InitializeLogger("tri.log")
+	logger = utils.Logger
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file override (Default is $HOME/.tri.yml),")
+}
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -37,12 +48,6 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
-}
-
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file override (Default is $HOME/.tri.yml),")
 }
 
 func getDataFilePath() string {

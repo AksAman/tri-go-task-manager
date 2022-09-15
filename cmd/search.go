@@ -8,7 +8,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/AksAman/tri/todo"
+	"github.com/AksAman/tri/models/todo"
 	"github.com/spf13/cobra"
 )
 

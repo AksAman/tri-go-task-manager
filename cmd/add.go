@@ -5,9 +5,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/AksAman/tri/todo"
+	"github.com/AksAman/tri/models/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -20,12 +19,12 @@ var addCmd = &cobra.Command{
 
 func AddRun(cmd *cobra.Command, args []string) {
 
-	fmt.Println("Add called with args:")
+	logger.Debugln("Add called with args:")
 
 	items, err := todo.ReadItems(getDataFilePath())
 
 	if err != nil {
-		log.Printf("Error while reading todos: %v \n", err)
+		logger.Errorf("Error while reading todos: %v \n", err)
 	}
 
 	lastPosition := -1
@@ -47,7 +46,7 @@ func AddRun(cmd *cobra.Command, args []string) {
 
 	err = todo.SaveItems(getDataFilePath(), items)
 	if err != nil {
-		log.Printf("Error while saving todos: %#v \n", err)
+		logger.Errorf("Error while saving todos: %#v \n", err)
 	}
 }
 

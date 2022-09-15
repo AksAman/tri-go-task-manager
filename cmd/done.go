@@ -4,10 +4,9 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"log"
 	"strconv"
 
-	"github.com/AksAman/tri/todo"
+	"github.com/AksAman/tri/models/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -22,37 +21,40 @@ var doneCmd = &cobra.Command{
 func doneRun(cmd *cobra.Command, args []string) {
 
 	if len(args) == 0 {
-		log.Fatalln("No id provided")
+		logger.Fatalln("No id provided")
 	}
 
 	idToMark, err := strconv.Atoi(args[0])
 
 	if err != nil {
-		log.Fatalln("Provided argument is not a valid id, it should be of type:int")
+		logger.Fatalln("Provided argument is not a valid id, it should be of type:int")
 	}
 
 	if idToMark < 0 {
-		log.Fatalln("Provided argument is not a valid id, it should be a positive integer")
+		logger.Fatalln("Provided argument is not a valid id, it should be a positive integer")
 	}
 
 	existingItems, err := todo.ReadItems(getDataFilePath())
+	if err != nil {
+		logger.Fatalln("Error while reading items:", err)
+	}
 
 	if idToMark > len(existingItems) {
-		log.Fatalln("Provided ID exceeds maximum possible todo's id")
+		logger.Fatalln("Provided ID exceeds maximum possible todo's id")
 	}
 
 	position := searchItemsForPosition(idToMark, existingItems)
 
 	if position < 0 {
-		log.Fatalln("No such position found")
+		logger.Fatalln("No such position found")
 	}
 
 	item := existingItems[position]
 	if item.Done {
-		log.Println("[" + item.Label() + " : " + item.Text + "] is already complete")
+		logger.Infoln("[" + item.Label() + " : " + item.Text + "] is already complete")
 		return
 	}
-	log.Println("Marking [" + item.Label() + " : " + item.Text + "] as Done.")
+	logger.Infoln("Marking [" + item.Label() + " : " + item.Text + "] as Done.")
 
 	existingItems[position].Done = true
 
