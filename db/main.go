@@ -167,6 +167,28 @@ func runUserExample(db *bolt.DB) {
 	utils.Title("Running User example")
 	userBucketName := "USERS"
 
+	createBucket(userBucketName, db)
+
+	users := []*User{
+		{FirstName: "John", LastName: "Doe"},
+		{FirstName: "Jane", LastName: "Doe"},
+		{FirstName: "John", LastName: "Smith"},
+		{FirstName: "Jane", LastName: "Smith"},
+	}
+
+	for _, u := range users {
+		err := createUser(userBucketName, db, u)
+		if err != nil {
+			logger.Errorf("error while adding user:%v to db.%s, %v", u, userBucketName, err)
+			continue
+		}
+		logger.Debugf("Successfully added user:%v to db.%s with id:%d", u, userBucketName, u.ID)
+	}
+
+	for _, u := range users {
+		fmt.Printf("u.ID: %v\n", u.ID)
+	}
+
 	showAllData(
 		userBucketName,
 		db,
@@ -182,27 +204,6 @@ func runUserExample(db *bolt.DB) {
 			return fmt.Sprintf("%+v", user)
 		},
 	)
-	// createBucket(userBucketName, db)
-
-	// users := []*User{
-	// 	{FirstName: "John", LastName: "Doe"},
-	// 	{FirstName: "Jane", LastName: "Doe"},
-	// 	{FirstName: "John", LastName: "Smith"},
-	// 	{FirstName: "Jane", LastName: "Smith"},
-	// }
-
-	// for _, u := range users {
-	// 	err := createUser(userBucketName, db, u)
-	// 	if err != nil {
-	// 		logger.Errorf("error while adding user:%v to db.%s, %v", u, userBucketName, err)
-	// 		continue
-	// 	}
-	// 	logger.Debugf("Successfully added user:%v to db.%s with id:%d", u, userBucketName, u.ID)
-	// }
-
-	// for _, u := range users {
-	// 	fmt.Printf("u.ID: %v\n", u.ID)
-	// }
 }
 
 func createUser(userBucket string, db *bolt.DB, user *User) error {
