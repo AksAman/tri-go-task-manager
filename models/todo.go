@@ -1,18 +1,22 @@
-package todo
+package models
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-	"sort"
 	"strconv"
-	"text/tabwriter"
 
 	"github.com/AksAman/tri/utils"
+	"go.uber.org/zap"
 )
 
+var logger *zap.SugaredLogger
+
+func init() {
+	utils.InitializeLogger("tri.log")
+	logger = utils.Logger
+}
+
 type Item struct {
+	ID       int    `json:"id"`
 	Text     string `json:"text"`
 	Priority int    `json:"priority"`
 	Position int    `json:"position"`
@@ -51,43 +55,10 @@ func (item *Item) Status() string {
 }
 
 func (item Item) Label() string {
-	return strconv.Itoa(item.Position)
+	return strconv.Itoa(item.ID)
 }
 
-func ReadItems(filename string) ([]Item, error) {
-	if !utils.DoesFileExists(filename) {
-		return []Item{}, errors.New(filename + " doesn't exist!")
-	}
-
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return []Item{}, err
-	}
-
-	var items []Item
-
-	if err := json.Unmarshal(data, &items); err != nil {
-		return []Item{}, err
-	}
-
-	return items, nil
-}
-
-func SaveItems(filename string, items []Item) error {
-	marshalled, err := json.MarshalIndent(items, "", "    ")
-
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(filename, marshalled, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
+// region ItemsByPri sort.Interface
 // ItemsByPri implements sort.Interface for Item
 type ItemsByPri []Item
 
@@ -111,24 +82,4 @@ func (s ItemsByPri) Less(i, j int) bool {
 	return s[i].Priority < s[j].Priority
 }
 
-func ShowTridos(items []Item, filterCondition func(item Item) bool) {
-	filteredItems := []Item{}
-	for _, item := range items {
-		if filterCondition(item) {
-			filteredItems = append(filteredItems, item)
-		}
-	}
-
-	if len(filteredItems) == 0 {
-		fmt.Println("No TODOs found!")
-	}
-
-	sort.Sort(ItemsByPri(filteredItems))
-
-	w := tabwriter.NewWriter(os.Stdout, 3, 0, 1, ' ', 0)
-	defer w.Flush()
-
-	for _, item := range filteredItems {
-		fmt.Fprint(w, item.PrettyItem())
-	}
-}
+// endregion DB

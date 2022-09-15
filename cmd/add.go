@@ -4,9 +4,8 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/AksAman/tri/models/todo"
+	"github.com/AksAman/tri/models"
+	"github.com/AksAman/tri/services"
 	"github.com/spf13/cobra"
 )
 
@@ -21,30 +20,19 @@ func AddRun(cmd *cobra.Command, args []string) {
 
 	logger.Debugln("Add called with args:")
 
-	items, err := todo.ReadItems(getDataFilePath())
-
-	if err != nil {
-		logger.Errorf("Error while reading todos: %v \n", err)
-	}
-
-	lastPosition := -1
-	if len(items) > 0 {
-		lastPosition = items[len(items)-1].Position
-	}
+	items := []models.Item{}
 
 	for _, arg := range args {
-		newItem := todo.Item{
-			Text:     arg,
-			Position: lastPosition + 1,
+		newItem := models.Item{
+			Text: arg,
 		}
 		newItem.SetPriority(priority)
 		items = append(items, newItem)
-		lastPosition++
 	}
 
-	fmt.Printf("Items: %#v\n", items)
+	logger.Debugf("Items: %#v\n", items)
 
-	err = todo.SaveItems(getDataFilePath(), items)
+	err := services.SaveItems(items)
 	if err != nil {
 		logger.Errorf("Error while saving todos: %#v \n", err)
 	}

@@ -8,7 +8,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/AksAman/tri/models/todo"
+	"github.com/AksAman/tri/models"
+	"github.com/AksAman/tri/services"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +25,7 @@ func searchRun(cmd *cobra.Command, args []string) {
 		log.Fatalln("No search keyword passed, exiting!")
 	}
 
-	items, err := todo.ReadItems(getDataFilePath())
+	items, err := services.ReadItems()
 	if err != nil {
 		log.Printf("Error while reading todos: %v \n", err)
 	}
@@ -36,7 +37,7 @@ func searchRun(cmd *cobra.Command, args []string) {
 
 	keyword := args[0]
 
-	todo.ShowTridos(items, func(item todo.Item) bool {
+	services.ShowTridos(items, func(item models.Item) bool {
 		textToSearch := strings.ToLower(item.Text)
 		query := strings.ToLower(keyword)
 		return strings.Contains(textToSearch, query)

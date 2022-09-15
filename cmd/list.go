@@ -6,7 +6,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/AksAman/tri/models/todo"
+	"github.com/AksAman/tri/models"
+	"github.com/AksAman/tri/services"
 	"github.com/spf13/cobra"
 )
 
@@ -25,9 +26,10 @@ var (
 )
 
 func ListRun(cmd *cobra.Command, args []string) {
-	items, err := todo.ReadItems(getDataFilePath())
+	items, err := services.ReadItems()
 	if err != nil {
 		logger.Errorf("Error while reading todos: %v \n", err)
+		fmt.Println("No TODOs, use add to create new")
 		return
 	}
 
@@ -36,7 +38,7 @@ func ListRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	todo.ShowTridos(items, func(item todo.Item) bool {
+	services.ShowTridos(items, func(item models.Item) bool {
 		return showAllOpt || item.Done == showDoneOpt
 	})
 }

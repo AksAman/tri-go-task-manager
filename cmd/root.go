@@ -6,18 +6,16 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/AksAman/tri/utils"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 var (
-	dataFile   string
 	configFile string
+	logger     *zap.SugaredLogger
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -31,7 +29,6 @@ var rootCmd = &cobra.Command{
 	by spf13 (https://spf13.com/presentation/building-an-awesome-cli-app-in-go-oscon/)
 `,
 }
-var logger *zap.SugaredLogger
 
 func init() {
 	utils.InitializeLogger("tri.log")
@@ -39,6 +36,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file override (Default is $HOME/.tri.yml),")
+
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -48,17 +46,6 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
-}
-
-func getDataFilePath() string {
-	viperDataFile := viper.GetString("datafile")
-	if viperDataFile == "" {
-		fmt.Println("No configuration found for datafile, using default path as " + dataFile)
-		userHome, _ := homedir.Dir()
-		return filepath.Join(userHome, ".tridos.json")
-	}
-	viperDataFile, _ = homedir.Expand(viperDataFile)
-	return viperDataFile
 }
 
 func initConfig() {

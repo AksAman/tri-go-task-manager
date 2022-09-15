@@ -6,7 +6,7 @@ package cmd
 import (
 	"strconv"
 
-	"github.com/AksAman/tri/models/todo"
+	"github.com/AksAman/tri/services"
 	"github.com/spf13/cobra"
 )
 
@@ -28,47 +28,21 @@ func doneRun(cmd *cobra.Command, args []string) {
 
 	if err != nil {
 		logger.Fatalln("Provided argument is not a valid id, it should be of type:int")
+		return
 	}
 
 	if idToMark < 0 {
 		logger.Fatalln("Provided argument is not a valid id, it should be a positive integer")
-	}
-
-	existingItems, err := todo.ReadItems(getDataFilePath())
-	if err != nil {
-		logger.Fatalln("Error while reading items:", err)
-	}
-
-	if idToMark > len(existingItems) {
-		logger.Fatalln("Provided ID exceeds maximum possible todo's id")
-	}
-
-	position := searchItemsForPosition(idToMark, existingItems)
-
-	if position < 0 {
-		logger.Fatalln("No such position found")
-	}
-
-	item := existingItems[position]
-	if item.Done {
-		logger.Infoln("[" + item.Label() + " : " + item.Text + "] is already complete")
 		return
 	}
-	logger.Infoln("Marking [" + item.Label() + " : " + item.Text + "] as Done.")
 
-	existingItems[position].Done = true
-
-	todo.SaveItems(getDataFilePath(), existingItems)
-	ListRun(cmd, args)
-}
-
-func searchItemsForPosition(keyPosition int, items []todo.Item) int {
-	for _, item := range items {
-		if item.Position == keyPosition {
-			return item.Position
-		}
+	err = services.MarkItemDoneByID(idToMark)
+	if err != nil {
+		logger.Fatalf("error while marking item done by id(%d): %v", idToMark, err)
+		return
 	}
-	return -1
+
+	ListRun(cmd, args)
 }
 
 func init() {
