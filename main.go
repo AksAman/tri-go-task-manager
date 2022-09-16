@@ -4,6 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
+	"github.com/AksAman/tri/cmd"
 	"github.com/AksAman/tri/utils"
 	"go.uber.org/zap"
 )
@@ -16,10 +17,5 @@ func init() {
 }
 
 func main() {
-	// cmd.Execute()
-	logger.Info("Hello World")
-	logger.Debug("Hello World")
-	logger.Warn("Hello World")
-	logger.Error("Hello World")
-
+	cmd.Execute()
 }

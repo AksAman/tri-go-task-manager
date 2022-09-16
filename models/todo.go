@@ -3,17 +3,7 @@ package models
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/AksAman/tri/utils"
-	"go.uber.org/zap"
 )
-
-var logger *zap.SugaredLogger
-
-func init() {
-	utils.InitializeLogger("tri.log")
-	logger = utils.Logger
-}
 
 type Item struct {
 	ID       int    `json:"id"`
@@ -36,7 +26,7 @@ func (item *Item) SetPriority(priority int) {
 	}
 }
 
-func (item Item) PrettyPriority() string {
+func (item *Item) PrettyPriority() string {
 	switch item.Priority {
 	case 1:
 		return "HIGH"
@@ -54,7 +44,7 @@ func (item *Item) Status() string {
 	return "[ ]"
 }
 
-func (item Item) Label() string {
+func (item *Item) Label() string {
 	return strconv.Itoa(item.ID)
 }
 
