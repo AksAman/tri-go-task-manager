@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	bucketName []byte = []byte("TODO")
+	bucketName = []byte("TODO")
 	db         *bolt.DB
 	logger     *zap.SugaredLogger
 )
@@ -28,9 +28,9 @@ func init() {
 	utils.InitializeLogger("tri.log")
 	logger = utils.Logger
 
-	initDB()
+	_ = initDB()
 	dblib.GetOrCreateBucket(db, bucketName)
-	db.Close()
+	_ = db.Close()
 }
 
 func getDBFilePath() string {
@@ -55,9 +55,9 @@ func initDB() error {
 }
 
 func ReadItems() ([]models.Item, error) {
-	dbFilpath := getDBFilePath()
-	if !utils.DoesFileExists(dbFilpath) {
-		return []models.Item{}, errors.New(dbFilpath + " doesn't exist!")
+	dbFilepath := getDBFilePath()
+	if !utils.DoesFileExists(dbFilepath) {
+		return []models.Item{}, errors.New(dbFilepath + " doesn't exist!")
 	}
 
 	err := initDB()
@@ -66,7 +66,7 @@ func ReadItems() ([]models.Item, error) {
 	}
 	defer db.Close()
 
-	items := []models.Item{}
+	var items []models.Item
 	err = db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(bucketName)
 		cursor := bucket.Cursor()
@@ -166,7 +166,7 @@ func MarkItemDoneByID(id int) error {
 
 func ShowTridos(items []models.Item, filterCondition func(item models.Item) bool) {
 	utils.Title("Your TriDos")
-	filteredItems := []models.Item{}
+	var filteredItems []models.Item
 	for _, item := range items {
 		if filterCondition(item) {
 			filteredItems = append(filteredItems, item)
@@ -183,6 +183,9 @@ func ShowTridos(items []models.Item, filterCondition func(item models.Item) bool
 	defer w.Flush()
 
 	for _, item := range filteredItems {
-		fmt.Fprint(w, item.PrettyItem())
+		_, err := fmt.Fprint(w, item.PrettyItem())
+		if err != nil {
+			return
+		}
 	}
 }
