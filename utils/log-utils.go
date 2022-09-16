@@ -3,8 +3,10 @@ package utils
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -36,7 +38,8 @@ func getJSONEncoder() zapcore.Encoder {
 
 func getConsoleEncoder() zapcore.Encoder {
 	config := getEncoderConfig()
-	return zapcore.NewConsoleEncoder(config)
+	e := &ColoredConsoleEncoder{cfg: config, Encoder: zapcore.NewConsoleEncoder(config)}
+	return e
 }
 
 func getLogWriter(logFilename string) zapcore.WriteSyncer {
@@ -46,4 +49,59 @@ func getLogWriter(logFilename string) zapcore.WriteSyncer {
 	}
 	file, _ := os.OpenFile(filepath.Join(logsPath, logFilename), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0744)
 	return zapcore.AddSync(file)
+}
+
+// custom zap encoder
+type ColoredConsoleEncoder struct {
+	zapcore.Encoder
+	cfg zapcore.EncoderConfig
+}
+
+func (e *ColoredConsoleEncoder) Clone() zapcore.Encoder {
+	return &ColoredConsoleEncoder{
+		// cloning the encoder with the base config
+		Encoder: zapcore.NewConsoleEncoder(e.cfg),
+		cfg:     e.cfg,
+	}
+}
+
+// EncodeEntry implementing only EncodeEntry
+func (e *ColoredConsoleEncoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
+	entry.Message = e.ColoredMessage(entry.Level, entry.Message)
+
+	// calling the embedded encoder's EncodeEntry to keep the original encoding format
+	consolebuf, err := e.Encoder.EncodeEntry(entry, fields)
+	if err != nil {
+		return nil, err
+	}
+
+	return consolebuf, nil
+}
+
+const HEADER = "\033[95m"
+const OKBLUE = "\033[94m"
+const OKCYAN = "\033[96m"
+const OKGREEN = "\033[92m"
+const WARNING = "\033[93m"
+const FAIL = "\033[91m"
+const ENDC = "\033[0m"
+const BOLD = "\033[1m"
+const UNDERLINE = "\033[4m"
+const GREY = "\x1b[5m\x1b[29m"
+
+var levelToColorMapping = map[zapcore.Level][]string{
+	zapcore.DebugLevel:  {GREY},
+	zapcore.InfoLevel:   {OKGREEN},
+	zapcore.WarnLevel:   {WARNING},
+	zapcore.ErrorLevel:  {FAIL},
+	zapcore.DPanicLevel: {FAIL, BOLD, UNDERLINE},
+	zapcore.PanicLevel:  {FAIL, BOLD, UNDERLINE},
+}
+
+// some mapper function
+func (e *ColoredConsoleEncoder) ColoredMessage(lvl zapcore.Level, message string) string {
+	colors := levelToColorMapping[lvl]
+	prefix := strings.Join(colors, "")
+	prefix += message + ENDC
+	return prefix
 }
